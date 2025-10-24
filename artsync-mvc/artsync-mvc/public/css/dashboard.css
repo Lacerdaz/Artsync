@@ -1,0 +1,784 @@
+/* public/css/dashboard.css - ESTILO UNIFICADO COM LANDING PAGE (REVISADO) */
+
+/* Importa as variáveis globais e fonte definidas em style.css */
+/* Garanta que style.css está sendo carregado ANTES deste arquivo no header.php */
+
+/* =================================== */
+/* LAYOUT GERAL DO DASHBOARD           */
+/* =================================== */
+.dashboard-container {
+    display: flex;
+    /* Organiza sidebar e main-content lado a lado */
+    width: 100%;
+    min-height: 100vh;
+    /* Ocupa a altura total da tela */
+    position: relative;
+    /* Contexto para elementos posicionados */
+    z-index: 1;
+    /* Garante que fique acima dos efeitos de fundo do body */
+}
+
+.main-content {
+    flex: 1;
+    /* Ocupa o espaço restante */
+    padding: 35px 45px;
+    /* Padding interno */
+    overflow-y: auto;
+    /* Adiciona scroll se necessário */
+    position: relative;
+    /* Contexto para elementos internos */
+    z-index: 1;
+}
+
+.main-header {
+    margin-bottom: 35px;
+    /* Espaço abaixo do cabeçalho */
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    /* Linha sutil da landing */
+}
+
+.main-header h2 {
+    font-family: 'Poppins', sans-serif;
+    /* Garante a fonte */
+    font-weight: 500;
+    /* Destaque para o título */
+    font-size: 2.1em;
+    /* Tamanho ajustado */
+    margin-bottom: 5px;
+    color: var(--primary-text-color);
+    /* Branco */
+}
+
+.main-header p {
+    color: var(--secondary-text-color);
+    /* Cinza claro */
+    font-size: 1.1em;
+    font-weight: 300;
+    /* Peso padrão */
+}
+
+/* =================================== */
+/* SIDEBAR (MENU LATERAL) - Estilo Glass */
+/* =================================== */
+.sidebar {
+    width: 260px;
+    /* Largura da barra lateral */
+    flex-shrink: 0;
+    /* Impede que encolha */
+    /* Efeito Glass da Landing Page */
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid var(--border-color);
+    /* Borda sutil */
+    display: flex;
+    flex-direction: column;
+    /* Organiza logo, nav e footer verticalmente */
+    padding: 25px;
+    transition: width 0.3s ease;
+    z-index: 10;
+    /* Garante que fique acima do conteúdo principal se houver sobreposição */
+    position: relative;
+    /* Contexto para o footer */
+}
+
+.sidebar .logo {
+    display: block;
+    text-align: center;
+    margin-bottom: 45px;
+    text-decoration: none;
+}
+
+.sidebar .logo img {
+    height: 55px;
+    width: auto;
+    display: inline-block;
+}
+
+.sidebar nav {
+    flex-grow: 1;
+    /* FAZ A NAVEGAÇÃO OCUPAR O ESPAÇO E EMPURRAR O FOOTER */
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar nav li {
+    margin-bottom: 10px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 13px 18px;
+    border-radius: 8px;
+    color: var(--secondary-text-color);
+    /* Cinza claro */
+    font-weight: 300;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.sidebar nav a i.fa-fw {
+    /* Estilo para ícones Font Awesome */
+    width: 1.2em;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.sidebar nav a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Fundo sutil */
+    border-color: rgba(255, 255, 255, 0.1);
+    /* Borda sutil */
+    color: var(--primary-text-color);
+    /* Texto branco */
+}
+
+.sidebar nav li.active a {
+    background-color: var(--glow-color);
+    /* Fundo branco (glow) */
+    color: #000000;
+    /* Texto preto */
+    font-weight: 500;
+    /* Mais destaque */
+    border-color: var(--glow-color);
+}
+
+/* Rodapé da Sidebar */
+.sidebar-footer {
+    margin-top: auto;
+    /* ESSENCIAL para empurrar para baixo */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+/* Área de Notificações */
+.notifications { 
+    /* position: relative; */ /* <<< GARANTIR QUE ESTÁ REMOVIDO/COMENTADO */
+    flex-shrink: 0; 
+    /* ... outros estilos flex ... */
+}
+
+#notification-bell {
+    font-size: 1.4em; 
+    cursor: pointer; 
+    /* position: relative; */ /* REMOVIDO DAQUI */
+    color: var(--secondary-text-color); 
+    transition: color 0.2s ease, background-color 0.2s ease; 
+    padding: 8px; 
+    display: inline-block; 
+    border-radius: 50%;
+    line-height: 1;
+    position: relative; /* <<< ADICIONAR ESTA LINHA (ÂN CORA) */
+}
+
+#notification-bell:hover {
+    color: var(--primary-text-color);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.notification-count {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: var(--error-color);
+    color: white;
+    border-radius: 50%;
+    padding: 1px 5px;
+    font-size: 0.7em;
+    font-weight: bold;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* O Dropdown (Caixa que abre) - POSICIONAMENTO CORRIGIDO v4 (Relativo ao Sino) */
+.notification-dropdown {
+    display: none; 
+    position: absolute; 
+    bottom: calc(100% + 8px); /* Posiciona 8px ACIMA da borda inferior do SINO */
+    right: 0;               /* Alinha a BORDA DIREITA do dropdown com a BORDA DIREITA do SINO */
+    width: 250px;           /* Largura desejada para o dropdown */
+    background-color: #1a1b1e; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px; 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); 
+    z-index: 1001; 
+    max-height: 400px; 
+    overflow-y: auto; 
+    color: var(--secondary-text-color);
+}
+
+.notification-dropdown.show {
+    display: block;
+    animation: fadeInDropdown 0.2s ease-out;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-dropdown>p {
+    padding: 20px;
+    text-align: center;
+    font-style: italic;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+/* ... (Estilos .notification-item precisam ser revisados se implementados) ... */
+
+/* Botão Sair (Estilo Landing Button Outline) */
+.btn-logout {
+    flex-grow: 1;
+    /* Ocupa o espaço restante */
+    text-align: center;
+    padding: 10px;
+    border: 1px solid var(--secondary-text-color);
+    border-radius: 50px;
+    /* Redondo */
+    background: transparent;
+    color: var(--secondary-text-color);
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btn-logout:hover {
+    background-color: var(--error-color);
+    /* Fundo vermelho no hover */
+    border-color: var(--error-color);
+    color: white;
+}
+
+.btn-logout i.fa-fw {
+    width: 1em;
+}
+
+/* =================================== */
+/* CARDS & WIDGETS - Estilo Glass      */
+/* =================================== */
+.widgets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.widget,
+.card {
+    background: var(--glass-bg);
+    /* Aplica efeito glass */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: 16px;
+    /* Bordas mais arredondadas */
+    transition: all 0.3s ease;
+    color: var(--secondary-text-color);
+}
+
+.widget:hover,
+.card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.widget h3,
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--primary-text-color);
+    /* Título branco */
+    font-weight: 500;
+    font-size: 1.3em;
+}
+
+.widget p,
+.card p {
+    line-height: 1.6;
+    font-weight: 300;
+    font-size: 0.95em;
+}
+
+.widget-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.widget-link .widget h3 {
+    color: var(--primary-text-color);
+}
+
+.widget-link .widget p {
+    color: var(--secondary-text-color);
+}
+
+
+/* =================================== */
+/* FORMULÁRIOS dentro de Cards        */
+/* =================================== */
+.card form .input-group {
+    margin-bottom: 20px;
+}
+
+.card form label {
+    display: block;
+    color: var(--secondary-text-color);
+    margin-bottom: 8px;
+    font-weight: 300;
+    font-size: 0.9em;
+}
+
+.card form input[type="text"],
+.card form input[type="email"],
+.card form input[type="password"],
+.card form input[type="datetime-local"],
+.card form input[type="file"],
+.card form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Fundo escuro sutil */
+    color: var(--primary-text-color);
+    /* Texto branco */
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    transition: all 0.2s ease;
+}
+
+.card form input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.card form input[type="file"]::file-selector-button {
+    /* Botão interno */
+    background: var(--secondary-text-color);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: var(--background-color);
+    cursor: pointer;
+    margin-right: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+}
+
+.card form input:focus,
+.card form textarea:focus {
+    outline: none;
+    border-color: var(--glow-color);
+    background-color: #000;
+}
+
+.card form button.btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* =================================== */
+/* GRÁFICO                             */
+/* =================================== */
+.chart-container {
+    margin-bottom: 25px;
+    position: relative;
+    height: 400px;
+    /* Estilo Glass herdado de .card */
+    padding: 30px;
+}
+
+.chart-container h3 {
+    color: var(--primary-text-color);
+    font-weight: 500;
+}
+
+/* Cores dos eixos e legendas são controladas via JS */
+
+/* =================================== */
+/* PORTFÓLIO, AGENDA, IA, ADMIN        */
+/* =================================== */
+/* Mantém layouts, ajusta cores e fundos */
+
+/* Portfolio */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.portfolio-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.15);
+    /* Fundo um pouco mais visível */
+    transition: all 0.2s ease;
+}
+
+.portfolio-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.portfolio-item img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.item-info {
+    padding: 15px;
+}
+
+.item-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+    color: var(--primary-text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.item-info p {
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+    margin: 0 0 15px 0;
+    height: 40px;
+    overflow: hidden;
+    font-weight: 300;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    font-size: 0.8em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+    font-weight: 300;
+}
+
+.action-btn.delete {
+    background-color: var(--error-color);
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+
+/* Agenda */
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.schedule-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.schedule-item:hover {
+    border-color: var(--border-color);
+    transform: translateY(-3px);
+}
+
+.item-date {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 60px;
+}
+
+.item-date .day {
+    font-size: 1.8em;
+    font-weight: 500;
+    color: var(--primary-text-color);
+    display: block;
+}
+
+.item-date .month {
+    text-transform: uppercase;
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+}
+
+.item-details {
+    flex-grow: 1;
+}
+
+.item-details h4 {
+    font-weight: 500;
+    color: var(--primary-text-color);
+    margin-bottom: 5px;
+}
+
+.item-details p {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    color: var(--secondary-text-color);
+    font-weight: 300;
+}
+
+.item-action {
+    margin-left: auto;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    font-size: 1.2em;
+    padding: 5px;
+}
+
+.btn-delete:hover {
+    color: var(--error-color);
+}
+
+
+.chat-bubble {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    padding: 15px 0;
+    border-radius: 12px;
+}
+
+.user-bubble-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.user-bubble-form form {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-bubble-form textarea {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--primary-text-color);
+    font-size: 1em;
+    resize: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    min-height: 24px;
+    max-height: 100px;
+    overflow-y: auto;
+    padding: 5px;
+    line-height: 1.4;
+}
+
+.user-bubble-form textarea:focus {
+    outline: none;
+}
+
+.user-bubble-form textarea::placeholder {
+    color: var(--secondary-text-color);
+    opacity: 0.8;
+}
+
+.user-bubble-form button {
+    background: var(--glow-color);
+    color: #000;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-bubble-form button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px var(--glow-color);
+}
+
+.conversation-history {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.user-bubble {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.ai-bubble {
+    align-self: flex-start;
+}
+
+.chat-bubble p {
+    margin: 0;
+    padding: 12px 18px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--primary-text-color);
+    border-radius: 18px;
+    font-weight: 300;
+}
+
+.user-bubble p {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom-right-radius: 4px;
+}
+
+.ai-bubble p {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom-left-radius: 4px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    font-size: 1em;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    background-color: var(--secondary-text-color);
+    color: #000;
+}
+
+.ai-avatar {
+    background: var(--glow-color);
+    color: #000;
+    font-size: 1.5em;
+}
+
+.spinner-container {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.spinner {
+    border: 4px solid #333;
+    border-top-color: var(--glow-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Admin Tables */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.card th,
+.card td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 300;
+}
+
+.card thead th {
+    background-color: rgba(255, 255, 255, 0.05);
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+.card tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.card td.actions a {
+    margin-right: 10px;
+    font-size: 1.1em;
+    text-decoration: none;
+}
+
+.card td.actions a.delete {
+    color: var(--error-color);
+}
+
+.card td.actions a:hover {
+    opacity: 0.7;
+}

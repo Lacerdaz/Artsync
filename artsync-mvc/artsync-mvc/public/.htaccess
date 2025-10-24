@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Condição 1: Aplica a regra APENAS SE a URL pedida NÃO for um arquivo existente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # Condição 2: E APENAS SE a URL pedida NÃO for um diretório existente
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Condição 3 (NOVA): E APENAS SE a URL pedida NÃO for /index.php
+    RewriteCond %{REQUEST_URI} !^/index\.php$
+
+    # Regra: Redireciona tudo que passou pelas condições acima para o index.php
+    RewriteRule ^ index.php [L]
+</IfModule>

@@ -1,0 +1,117 @@
+/* public/css/style.css - BASEADO ESTRITAMENTE NA LANDING PAGE */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;500;700&display=swap'); /* Fonte da Landing */
+/* A fonte 'Boldonse' é específica para o H1 da landing, não a usaremos globalmente */
+
+/* Variáveis de Cor ESTritamente da Landing Page */
+:root {
+    --primary-text-color: #ffffff;
+    --secondary-text-color: #bbbbbb;
+    --glow-color: #ffffff; /* Usado para botões e destaques */
+    --background-color: #05050a; /* Fundo principal escuro */
+    --glass-bg: rgba(10, 10, 15, 0.6); /* Efeito vidro principal */
+    --border-color: rgba(255, 255, 255, 0.1); /* Bordas sutis */
+
+    /* Cores de feedback mantidas (mas podem ser ajustadas se quiser) */
+    --success-color: #28a745;
+    --error-color: #dc3545;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    position: relative; /* Necessário para efeitos de fundo fixos */
+    font-family: 'Poppins', sans-serif; /* Aplica a fonte globalmente */
+    font-weight: 300; /* Peso padrão */
+    color: var(--secondary-text-color); /* Cor de texto padrão */
+    background-color: var(--background-color); /* Fundo escuro */
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Efeitos de fundo (Ondas) - Aplicados globalmente */
+ body::before { 
+    content: '';
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 100%; height: 300px;
+    z-index: -2; /* Bem no fundo */
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='1' d='M0,160L48,181.3C96,203,192,245,288,240C384,235,480,181,576,149.3C672,117,768,107,864,128C960,149,1056,203,1152,208C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-size: cover;
+    animation: wave-motion 15s ease-in-out infinite alternate;
+}
+@keyframes wave-motion {
+    from { transform: translateY(0px); }
+    to { transform: translateY(30px); }
+}
+/* SVG do cabo removido para simplicidade no dashboard */
+
+/* Estilo para centralizar Login/Register */
+.centered-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--secondary-text-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-text-color);
+}
+
+/* Botão Principal (Estilo CTA da Landing adaptado) */
+.btn {
+    display: inline-block; 
+    padding: 12px 30px; 
+    border: 1px solid var(--glow-color);
+    border-radius: 50px; 
+    background: transparent;
+    color: var(--glow-color);
+    font-size: 1em; 
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background: var(--glow-color);
+    color: #000; 
+    box-shadow: 0 0 15px var(--glow-color);
+}
+ /* Botões dentro de formulários terão largura total e borda menos redonda */
+form .btn {
+    width: 100%;
+    border-radius: 8px; 
+}
+
+/* Mensagens de Feedback com estilo glass sutil */
+.error-message, .success-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px; 
+    text-align: center;
+    font-weight: 300;
+    border: 1px solid; /* Borda definida abaixo */
+    background: rgba(10, 10, 15, 0.4); /* Fundo glass sutil */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+.error-message {
+    border-color: var(--error-color);
+    color: #f8d7da; /* Texto mais claro para contraste */
+}
+.success-message {
+    border-color: var(--success-color);
+    color: #d4edda; /* Texto mais claro para contraste */
+}
