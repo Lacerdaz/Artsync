@@ -61,30 +61,18 @@ class PortfolioController extends AuthController
     /**
      * Exibe a página do portfólio com os itens do usuário.
      */
-   // --- dentro de index(): HOTFIX opcional (mantém objetos na view) ---
-public function index(): void {
-    $items = $this->repository->getByUserId((int)$_SESSION['user_id']);
+    public function index(): void
+    {
+        $items = $this->repository->getByUserId((int)$_SESSION['user_id']);
 
-    // Se por algum motivo vierem arrays, converte para PortfolioItem
-    if (!empty($items) && is_array($items[0])) {
-        $items = array_map(fn($r) => new PortfolioItem(
-            (int)($r['id'] ?? 0),
-            (int)($r['user_id'] ?? 0),
-            (string)($r['title'] ?? ''),
-            (string)($r['file_path'] ?? ''),
-            (string)($r['description'] ?? '')
-        ), $items);
+        $this->view('portfolio/index', [
+            'pageTitle' => 'Meu Portfólio',
+            'currentPage' => 'portfolio',
+            'items' => $items,
+            'feedback' => $_SESSION['feedback'] ?? null
+        ]);
+        unset($_SESSION['feedback']);
     }
-
-    $this->view('portfolio/index', [
-        'pageTitle'    => 'Meu Portfólio',
-        'currentPage'  => 'portfolio',
-        'items'        => $items,
-        'feedback'     => $_SESSION['feedback'] ?? null
-    ]);
-    unset($_SESSION['feedback']);
-}
-
 
     /**
      * Faz o upload de uma nova mídia
@@ -105,24 +93,24 @@ public function index(): void {
         $unique_file_name = uniqid('media_') . '.' . $file_extension;
         $target_file = $this->uploadDir . $unique_file_name;
 
-      // --- dentro de upload(): use o repositório ---
-if (move_uploaded_file($file['tmp_name'], $target_file)) {
-    $webPath = '/uploads/' . $unique_file_name;
+        if (move_uploaded_file($file['tmp_name'], $target_file)) {
+            $webPath = '/uploads/' . $unique_file_name;
 
-    try {
-        $this->repository->save(
-            (int)$_SESSION['user_id'],
-            $title,
-            $webPath,
-            $description ?: null
-        );
-        $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia adicionada com sucesso!'];
-    } catch (PDOException $e) {
-        $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao salvar no banco: ' . $e->getMessage()];
-    }
-} else {
-    $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo.'];
-}
+            try {
+                $this->repository->save(
+                    (int)$_SESSION['user_id'],
+                    $title,
+                    $webPath,
+                    $description ?: null
+                );
+
+                $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia adicionada com sucesso!'];
+            } catch (PDOException $e) {
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao salvar no banco: ' . $e->getMessage()];
+            }
+        } else {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo.'];
+        }
 
         header('Location: /portfolio');
         exit;
@@ -140,16 +128,12 @@ if (move_uploaded_file($file['tmp_name'], $target_file)) {
         }
 
         // Busca o item (objeto)
-       // --- dentro de delete(): use o repositório find/delete (já retornando objeto) ---
-$item = $this->repository->find((int)$id, (int)$_SESSION['user_id']);
-if ($item) {
-    $filePath = __DIR__ . '/../../public' . $item->filePath;
-    if (is_file($filePath)) @unlink($filePath);
-
-    $this->repository->delete((int)$id, (int)$_SESSION['user_id']);
-    $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia excluída.'];
-}
-
+        $item = $this->repository->find($id, (int)$_SESSION['user_id']);
+        if (!$item) {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Item não encontrado.'];
+            header('Location: /portfolio');
+            exit;
+        }
 
         // Caminho físico completo do arquivo
         $filePath = __DIR__ . '/../../public' . $item->filePath;
