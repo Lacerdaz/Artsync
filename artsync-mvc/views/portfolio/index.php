@@ -55,5 +55,12 @@
         <?php endif; ?>
     </div>
 </div>
+<img src="<?= htmlspecialchars($item->filePath ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+     alt="<?= htmlspecialchars($item->title ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+<h3><?= htmlspecialchars($item->title ?? '', ENT_QUOTES, 'UTF-8') ?></h3>
+<p><?= htmlspecialchars($item->description ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+
+<a href="/portfolio/delete?id=<?= (int)($item->id ?? 0) ?>">Excluir</a>
 
 <?php require __DIR__ . '/../layouts/footer.php'; // Carrega o final do HTML ?>

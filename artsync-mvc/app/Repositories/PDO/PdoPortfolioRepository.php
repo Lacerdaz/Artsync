@@ -2,72 +2,103 @@
 
 namespace App\Repositories\PDO;
 
-use App\Models\PortfolioItem;
-use App\Repositories\Contracts\PortfolioRepositoryInterface;
-use Config\Database;
 use PDO;
+use PDOException;
+use App\Models\PortfolioItem;
 
-class PdoPortfolioRepository implements PortfolioRepositoryInterface {
-    
-    private PDO $db;
+class PdoPortfolioRepository
+{
+    private PDO $pdo;
 
-    public function __construct() {
-        // Pega a instância Singleton (única) da conexão com o banco
-        $this->db = Database::getInstance();
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
     }
 
-    public function getByUserId(int $userId): array {
-        $stmt = $this->db->prepare("SELECT * FROM portfolio WHERE user_id = :uid ORDER BY uploaded_at DESC");
-        $stmt->execute(['uid' => $userId]);
-        
-        $items = [];
-        while ($row = $stmt->fetch()) {
-            // Converte o array do banco em um objeto PortfolioItem
-            $items[] = new PortfolioItem(
-                $row['id'],
-                $row['user_id'],
-                $row['title'],
-                $row['file_path'],
-                $row['description']
-            );
+    /** Retorna todas as mídias do usuário como objetos PortfolioItem */
+    public function getByUserId(int $userId): array
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, user_id, title, file_path, description, created_at
+                FROM portfolio_items
+                WHERE user_id = :uid
+                ORDER BY created_at DESC
+            ");
+            $stmt->execute([':uid' => $userId]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return array_map(function ($r) {
+                return new PortfolioItem(
+                    (int)($r['id'] ?? 0),
+                    (int)($r['user_id'] ?? 0),
+                    (string)($r['title'] ?? ''),
+                    (string)($r['file_path'] ?? ''),
+                    (string)($r['description'] ?? '')
+                );
+            }, $rows);
+        } catch (PDOException $e) {
+            throw new PDOException("Erro ao buscar itens do portfólio: " . $e->getMessage());
         }
-        return $items;
     }
 
-    public function find(int $id, int $userId): ?PortfolioItem {
-        $stmt = $this->db->prepare("SELECT * FROM portfolio WHERE id = :id AND user_id = :uid");
-        $stmt->execute(['id' => $id, 'uid' => $userId]);
-        $row = $stmt->fetch();
-        
-        if ($row) {
-            // Converte o array do banco em um objeto PortfolioItem
+    /** Salva um novo item (retorna o ID inserido) */
+    public function save(int $userId, string $title, string $filePath, ?string $description = null): int
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO portfolio_items (user_id, title, file_path, description)
+                VALUES (:user_id, :title, :file_path, :description)
+            ");
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':title' => $title,
+                ':file_path' => $filePath,
+                ':description' => $description
+            ]);
+            return (int)$this->pdo->lastInsertId();
+        } catch (PDOException $e) {
+            throw new PDOException("Erro ao salvar item no portfólio: " . $e->getMessage());
+        }
+    }
+
+    /** Exclui uma mídia específica de um usuário */
+    public function delete(int $id, int $userId): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                DELETE FROM portfolio_items
+                WHERE id = :id AND user_id = :user_id
+            ");
+            return $stmt->execute([':id' => $id, ':user_id' => $userId]);
+        } catch (PDOException $e) {
+            throw new PDOException("Erro ao excluir item do portfólio: " . $e->getMessage());
+        }
+    }
+
+    /** Busca um item específico (para exclusão) */
+    public function find(int $id, int $userId): ?PortfolioItem
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, user_id, title, file_path, description
+                FROM portfolio_items
+                WHERE id = :id AND user_id = :user_id
+                LIMIT 1
+            ");
+            $stmt->execute([':id' => $id, ':user_id' => $userId]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$r) return null;
+
             return new PortfolioItem(
-                $row['id'],
-                $row['user_id'],
-                $row['title'],
-                $row['file_path'],
-                $row['description']
+                (int)($r['id'] ?? 0),
+                (int)($r['user_id'] ?? 0),
+                (string)($r['title'] ?? ''),
+                (string)($r['file_path'] ?? ''),
+                (string)($r['description'] ?? '')
             );
+        } catch (PDOException $e) {
+            throw new PDOException("Erro ao buscar item do portfólio: " . $e->getMessage());
         }
-        return null;
-    }
-
-    public function save(PortfolioItem $item): bool {
-        $stmt = $this->db->prepare(
-            "INSERT INTO portfolio (user_id, title, description, file_path, media_type) 
-             VALUES (:uid, :title, :desc, :path, 'image')" // 'image' como padrão
-        );
-        return $stmt->execute([
-            'uid' => $item->userId,
-            'title' => $item->title,
-            'desc' => $item->description,
-            'path' => $item->filePath // Salva o caminho web (/uploads/...)
-        ]);
-    }
-
-    public function delete(int $id, int $userId): bool {
-        // Deleta apenas se o ID do item E o ID do usuário baterem
-        $stmt = $this->db->prepare("DELETE FROM portfolio WHERE id = :id AND user_id = :uid");
-        return $stmt->execute(['id' => $id, 'uid' => $userId]);
     }
 }

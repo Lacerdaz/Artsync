@@ -4,38 +4,81 @@ namespace App\Controllers;
 
 use App\Models\PortfolioItem;
 use App\Repositories\PDO\PdoPortfolioRepository;
+use PDO;
+use PDOException;
 
-class PortfolioController extends AuthController {
-    
+class PortfolioController extends AuthController
+{
     private PdoPortfolioRepository $repository;
-    // Define o caminho físico real no servidor para onde os arquivos vão
+    private PDO $pdo;
     private string $uploadDir = __DIR__ . '/../../public/uploads/';
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->checkAuth();
-        $this->repository = new PdoPortfolioRepository();
+
+        try {
+            // Configuração do banco
+            $host = 'localhost';
+            $dbname = 'artsync_db';
+            $username = 'root';
+            $password = ''; // coloque sua senha do MySQL se tiver
+
+            $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $this->pdo = $pdo;
+            $this->repository = new PdoPortfolioRepository($pdo);
+
+            // Garante que a tabela exista
+            $this->createTableIfNotExists();
+
+        } catch (PDOException $e) {
+            die("Erro ao conectar ao banco de dados: " . $e->getMessage());
+        }
     }
 
     /**
-     * Ação: Exibe a página do portfólio com os itens do usuário.
+     * Cria a tabela portfolio_items se não existir
      */
-    public function index(): void {
-        $items = $this->repository->getByUserId($_SESSION['user_id']);
-        
+    private function createTableIfNotExists(): void
+    {
+        $sql = "
+            CREATE TABLE IF NOT EXISTS portfolio_items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                file_path VARCHAR(255) NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        ";
+        $this->pdo->exec($sql);
+    }
+
+    /**
+     * Exibe a página do portfólio com os itens do usuário.
+     */
+    public function index(): void
+    {
+        $items = $this->repository->getByUserId((int)$_SESSION['user_id']);
+
         $this->view('portfolio/index', [
             'pageTitle' => 'Meu Portfólio',
             'currentPage' => 'portfolio',
             'items' => $items,
             'feedback' => $_SESSION['feedback'] ?? null
         ]);
-        unset($_SESSION['feedback']); // Limpa a mensagem
+        unset($_SESSION['feedback']);
     }
 
     /**
-     * Ação: Processa o upload de uma nova mídia.
+     * Faz o upload de uma nova mídia
      */
-    public function upload(): void {
+    public function upload(): void
+    {
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
         $file = $_FILES['media_file'] ?? null;
@@ -45,60 +88,63 @@ class PortfolioController extends AuthController {
             header('Location: /portfolio');
             exit;
         }
-        
-        // Lógica de upload segura
+
         $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $unique_file_name = uniqid('media_') . '.' . $file_extension;
         $target_file = $this->uploadDir . $unique_file_name;
-        
+
         if (move_uploaded_file($file['tmp_name'], $target_file)) {
-            // Salva no banco o caminho ACESSÍVEL PELA WEB (ex: /uploads/media_123.jpg)
             $webPath = '/uploads/' . $unique_file_name;
-            
-            $item = new PortfolioItem(
-                null,
-                $_SESSION['user_id'],
-                $title,
-                $webPath,
-                $description
-            );
-            
-            $this->repository->save($item);
-            $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia adicionada com sucesso!'];
+
+            try {
+                $this->repository->save(
+                    (int)$_SESSION['user_id'],
+                    $title,
+                    $webPath,
+                    $description ?: null
+                );
+
+                $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia adicionada com sucesso!'];
+            } catch (PDOException $e) {
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao salvar no banco: ' . $e->getMessage()];
+            }
         } else {
             $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao mover o arquivo.'];
         }
-        
+
         header('Location: /portfolio');
         exit;
     }
 
     /**
-     * Ação: Processa a exclusão de uma mídia.
+     * Exclui uma mídia existente
      */
-    public function delete(): void {
-        $id = $_GET['id'] ?? null;
-        if (!$id) {
+    public function delete(): void
+    {
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        if ($id <= 0) {
             header('Location: /portfolio');
             exit;
         }
 
-        // 1. Pega o item no banco para saber o caminho do arquivo
-        $item = $this->repository->find((int)$id, $_SESSION['user_id']);
-
-        if ($item) {
-            // 2. Deleta o arquivo físico do servidor
-            // Constrói o caminho físico completo (ex: C:/xampp/htdocs/artsync-mvc/public/uploads/media_123.jpg)
-            $filePath = __DIR__ . '/../../public' . $item->filePath; 
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-            
-            // 3. Deleta o registro do banco
-            $this->repository->delete((int)$id, $_SESSION['user_id']);
-            $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia excluída.'];
+        // Busca o item (objeto)
+        $item = $this->repository->find($id, (int)$_SESSION['user_id']);
+        if (!$item) {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Item não encontrado.'];
+            header('Location: /portfolio');
+            exit;
         }
 
+        // Caminho físico completo do arquivo
+        $filePath = __DIR__ . '/../../public' . $item->filePath;
+        if (is_file($filePath)) {
+            @unlink($filePath);
+        }
+
+        // Exclui do banco
+        $this->repository->delete($item->id, (int)$_SESSION['user_id']);
+
+        $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Mídia excluída com sucesso!'];
         header('Location: /portfolio');
         exit;
     }
