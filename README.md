@@ -84,7 +84,7 @@ composer install
 #              Require all granted
 #          </Directory>
 #      </VirtualHost>
-#    - Edite o arquivo 'hosts' do seu sistema e adicione: 127.0.0.1 artsync.local
+#    - Edite o arquivo 'hosts' do seu sistema e adicione: 127.0.0.1 artsync.local C:\Windows\System32\drivers\etc\
 #    - Reinicie o Apache e os Serviços DNS (no WAMP).
 
 # 6. (Opcional) Chave de API da IA:
