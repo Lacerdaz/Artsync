@@ -88,19 +88,19 @@
                     plugins: {
                         legend: { 
                             labels: { 
-                                color: 'var(--text-color)' // Cor do texto da legenda (branco)
+                                color: 'rgba(255, 255, 255, 1)' // Cor do texto da legenda (branco)
                             } 
                         }
                     },
                     scales: { // Configuração dos eixos
                         y: { // Eixo Y (vertical)
                             beginAtZero: true, // Começa em zero
-                            ticks: { color: 'var(--secondary-color)' }, // Cor dos números
-                            grid: { color: 'var(--border-color)' } // Cor das linhas de grade
+                            ticks: { color: 'rgba(255, 255, 255, 1)' }, // Cor dos números
+                            grid: { color: 'rgba(255, 255, 255, 1)' } // Cor das linhas de grade
                         },
                         x: { // Eixo X (horizontal)
-                            ticks: { color: 'var(--secondary-color)' }, // Cor dos labels
-                            grid: { color: 'var(--border-color)' } 
+                            ticks: { color: 'rgba(255, 255, 255, 1)' }, // Cor dos labels
+                            grid: { color: 'rgba(255, 255, 255, 1)' } 
                         }
                     }
                 }
