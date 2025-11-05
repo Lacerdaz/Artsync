@@ -20,7 +20,7 @@ class AiService {
         }
         
         // ** SUA CHAVE DE API FOI INSERIDA AQUI **
-        $api_key = 'AIzaSyCH6kDwEjEBWMztJVcK6pnxHKlmb2nuUYI'; 
+        $api_key = 'SUA_CHAVE_DE_API_AQUI'; 
         // URL da API do Gemini (usando o modelo mais recente)
         $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' . $api_key;
         
