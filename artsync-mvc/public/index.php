@@ -9,43 +9,34 @@ use App\Controllers\PortfolioController;
 use App\Controllers\AiController;
 use App\Controllers\AdminController;
 use App\Controllers\LandingController;
-use App\Controllers\SpotifyController;
+use App\Controllers\ProfileController; // <<< NOVO
 
-// Pega a URL e o método da requisição
 $request_uri = $_SERVER['REQUEST_URI'];
-$method = $_SERVER['REQUEST_METHOD'];
-$route = strtok($request_uri, '?');
+$method     = $_SERVER['REQUEST_METHOD'];
+$route      = strtok($request_uri, '?');
 
 session_start();
 
 switch ($route) {
-    // Página inicial
+
     case '/':
     case '':
         (new LandingController())->index();
         break;
 
-    // Login
+    // Auth
     case '/login':
-        $controller = new AuthController();
-        if ($method === 'GET') {
-            $controller->showLogin();
-        } elseif ($method === 'POST') {
-            $controller->handleLogin();
-        }
+        $c = new AuthController();
+        if ($method === 'GET')   $c->showLogin();
+        elseif ($method === 'POST') $c->handleLogin();
         break;
 
-    // Registro
     case '/register':
-        $controller = new AuthController();
-        if ($method === 'GET') {
-            $controller->showRegister();
-        } elseif ($method === 'POST') {
-            $controller->handleRegister();
-        }
+        $c = new AuthController();
+        if ($method === 'GET')   $c->showRegister();
+        elseif ($method === 'POST') $c->handleRegister();
         break;
 
-    // Logout
     case '/logout':
         (new AuthController())->logout();
         break;
@@ -63,8 +54,7 @@ switch ($route) {
         if ($method === 'POST') {
             (new ScheduleController())->create();
         } else {
-            header('Location: /schedule');
-            exit;
+            header('Location: /schedule'); exit;
         }
         break;
     case '/schedule/delete':
@@ -79,15 +69,14 @@ switch ($route) {
         if ($method === 'POST') {
             (new PortfolioController())->upload();
         } else {
-            header('Location: /portfolio');
-            exit;
+            header('Location: /portfolio'); exit;
         }
         break;
     case '/portfolio/delete':
         (new PortfolioController())->delete();
         break;
 
-    // IA de Carreira
+    // IA
     case '/ai':
         (new AiController())->index();
         break;
@@ -95,17 +84,8 @@ switch ($route) {
         if ($method === 'POST') {
             (new AiController())->ask();
         } else {
-            header('Location: /ai');
-            exit;
+            header('Location: /ai'); exit;
         }
-        break;
-
-    // Spotify (corrigido!)
-    case '/connect-spotify':
-        (new SpotifyController())->connect();
-        break;
-    case '/spotify_callback':
-        (new SpotifyController())->callback();
         break;
 
     // Admin
@@ -116,16 +96,37 @@ switch ($route) {
         (new AdminController())->deleteUser();
         break;
 
-    // 404
+    // >>>>>>> PERFIL (NOVO)
+    case '/profile/edit':
+        (new ProfileController())->edit();
+        break;
+    case '/profile/update':
+        if ($method === 'POST') {
+            (new ProfileController())->update();
+        } else {
+            header('Location: /profile/edit'); exit;
+        }
+        break;
+
+    // Spotify legado (se você tiver ainda)
+    case '/connect-spotify':
+        $file = __DIR__ . '/../connect_spotify.php';
+        if (file_exists($file)) require $file;
+        else { http_response_code(500); echo "Arquivo connect_spotify.php não encontrado"; }
+        break;
+
+    case '/spotify_callback.php':
+        $file = __DIR__ . '/../spotify_callback.php';
+        if (file_exists($file)) require $file;
+        else { http_response_code(500); echo "Arquivo spotify_callback.php não encontrado"; }
+        break;
+
     default:
         http_response_code(404);
         $pageTitle = 'Página Não Encontrada';
         $currentPage = 'error';
         $viewFile = __DIR__ . '/../views/errors/404.php';
-        if (file_exists($viewFile)) {
-            require $viewFile;
-        } else {
-            echo '<h1>404 - Página Não Encontrada</h1>';
-        }
+        if (file_exists($viewFile)) require $viewFile;
+        else echo '<h1>404 - Página Não Encontrada</h1>';
         break;
 }
